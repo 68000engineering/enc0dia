@@ -732,6 +732,7 @@ function buildSequenceFrom(block) {
 
     else if (cur.type === 'delay_ms') {
       const msVal = getValueFromBlock(cur.getInputTargetBlock("MS"));
+      
       steps.push({ action: "delay", ms: msVal });
     }
 
@@ -739,6 +740,7 @@ function buildSequenceFrom(block) {
       const times = Number(cur.getFieldValue("TIMES")) || 1;
       const innerBlock = cur.getInputTargetBlock("DO");
       const innerSteps = innerBlock ? buildSequenceFrom(innerBlock) : [];
+      
       steps.push({
         action: "repeat",
         times: times,
@@ -746,141 +748,143 @@ function buildSequenceFrom(block) {
       });
     }
 
-      else if (cur.type === 'if_block') {
-        const leftVal  = getValueFromBlock(cur.getInputTargetBlock("LEFT"));
-        const rightVal = getValueFromBlock(cur.getInputTargetBlock("RIGHT"));
-        const op       = cur.getFieldValue("OP");
+    else if (cur.type === 'if_block') {
+      const leftVal  = getValueFromBlock(cur.getInputTargetBlock("LEFT"));
+      const rightVal = getValueFromBlock(cur.getInputTargetBlock("RIGHT"));
+      const op       = cur.getFieldValue("OP");
 
-        const thenBlock = cur.getInputTargetBlock("THEN");
-        const thenSteps = thenBlock ? buildSequenceFrom(thenBlock) : [];
+      const thenBlock = cur.getInputTargetBlock("THEN");
+      const thenSteps = thenBlock ? buildSequenceFrom(thenBlock) : [];
 
-        const elseBlock = cur.getInputTargetBlock("ELSE");
-        const elseSteps = elseBlock ? buildSequenceFrom(elseBlock) : [];
+      const elseBlock = cur.getInputTargetBlock("ELSE");
+      const elseSteps = elseBlock ? buildSequenceFrom(elseBlock) : [];
 
-        steps.push({
-          action: "if",
-          cond_left: leftVal,
-          cond_op: op,
-          cond_right: rightVal,
-          then: thenSteps,
-          else: elseSteps
-        });
-      }
+      steps.push({
+        action: "if",
+        cond_left: leftVal,
+        cond_op: op,
+        cond_right: rightVal,
+        then: thenSteps,
+        else: elseSteps
+      });
+    }
 
-      else if (cur.type === 'set_variable') {
-        const name = cur.getFieldValue("NAME");
-        const value = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
-        steps.push({
-          action: "setVar",
-          name: name,
-          value: value
-        });
-      }
+    else if (cur.type === 'set_variable') {
+      const name = cur.getFieldValue("NAME");
+      const value = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
+      
+      steps.push({
+        action: "setVar",
+        name: name,
+        value: value
+      });
+    }
 
-      else if (cur.type === 'analog_read') {
-        const pin = Number(cur.getFieldValue("PIN"));
-        const variable = cur.getFieldValue("VAR");
+    else if (cur.type === 'analog_read') {
+      const pin = Number(cur.getFieldValue("PIN"));
+      const variable = cur.getFieldValue("VAR");
 
-        steps.push({
-          action: "analogRead",
-          pin: pin,
-          var: variable
-        });
-      }
+      steps.push({
+        action: "analogRead",
+        pin: pin,
+        var: variable
+      });
+    }
 
 
-      else if (cur.type === 'change_variable') {
-        const name = cur.getFieldValue("NAME");
-        const delta = getValueFromBlock(cur.getInputTargetBlock("DELTA"));
-        steps.push({
-          action: "changeVar",
-          name: name,
-          delta: delta
-        });
-      }
+    else if (cur.type === 'change_variable') {
+      const name = cur.getFieldValue("NAME");
+      const delta = getValueFromBlock(cur.getInputTargetBlock("DELTA"));
+        
+      steps.push({
+        action: "changeVar",
+        name: name,
+        delta: delta
+      });
+    }
 
-      else if (cur.type === 'digital_write') {
-        const pin = Number(cur.getFieldValue("PIN"));
-        const val = Number(cur.getFieldValue("VALUE"));
+    else if (cur.type === 'digital_write') {
+      const pin = Number(cur.getFieldValue("PIN"));
+      const val = Number(cur.getFieldValue("VALUE"));
 
-        steps.push({
-          action: "digitalWrite",
-          pin: pin,
-          value: val
-        });
-      }
+      steps.push({
+        action: "digitalWrite",
+        pin: pin,
+        value: val
+      });
+    }
 
-      else if (cur.type === 'analog_write') {
-        const pin = Number(cur.getFieldValue("PIN"));
-        const val = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
+    else if (cur.type === 'analog_write') {
+      const pin = Number(cur.getFieldValue("PIN"));
+      const val = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
 
-        steps.push({
-          action: "analogWrite",
-          pin: pin,
-          value: val
-        });
-      }
+      steps.push({
+        action: "analogWrite",
+        pin: pin,
+        value: val
+      });
+    }
 
-      else if (cur.type === 'lcd_clear') {
-        steps.push({ action: "lcdClear" });
-      }
+    else if (cur.type === 'lcd_clear') {
+      steps.push({ action: "lcdClear" });
+    }
 
-      else if (cur.type === 'lcd_print') {
-        steps.push({
-          action: "lcdPrint",
-          text: cur.getFieldValue("TEXT")
-        });
-      }
+    else if (cur.type === 'lcd_print') {
+      steps.push({
+        action: "lcdPrint",
+        text: cur.getFieldValue("TEXT")
+      });
+    }
 
-      else if (cur.type === 'lcd_setup') {
-        steps.push({
-          action: "lcdSetup",
-          sda: Number(cur.getFieldValue("SDA")),
-          scl: Number(cur.getFieldValue("SCL"))
-        });
-      }
+    else if (cur.type === 'lcd_setup') {
+      steps.push({
+        action: "lcdSetup",
+        sda: Number(cur.getFieldValue("SDA")),
+        scl: Number(cur.getFieldValue("SCL"))
+      });
+    }
 
-      else if (cur.type === 'if_button') {
-        const pin = Number(cur.getFieldValue("PIN"));
+    else if (cur.type === 'if_button') {
+      const pin = Number(cur.getFieldValue("PIN"));
 
-        const thenBlock = cur.getInputTargetBlock("THEN");
-        const thenSteps = thenBlock ? buildSequenceFrom(thenBlock) : [];
+      const thenBlock = cur.getInputTargetBlock("THEN");
+      const thenSteps = thenBlock ? buildSequenceFrom(thenBlock) : [];
 
-        const elseBlock = cur.getInputTargetBlock("ELSE");
-        const elseSteps = elseBlock ? buildSequenceFrom(elseBlock) : [];
+      const elseBlock = cur.getInputTargetBlock("ELSE");
+      const elseSteps = elseBlock ? buildSequenceFrom(elseBlock) : [];
 
-        steps.push({
-          action: "ifButton",
-          pin: pin,
-          then: thenSteps,
-          else: elseSteps
-        });
-      }
+      steps.push({
+        action: "ifButton",
+        pin: pin,
+        then: thenSteps,
+        else: elseSteps
+      });
+    }
 
-      else if (cur.type === 'ultrasonic_setup') {
-        steps.push({
-          action: "ultrasonicSetup",
-          trig: Number(cur.getFieldValue("TRIG")),
-          echo: Number(cur.getFieldValue("ECHO"))
-        });
-      }
+    else if (cur.type === 'ultrasonic_setup') {
+      steps.push({
+        action: "ultrasonicSetup",
+        trig: Number(cur.getFieldValue("TRIG")),
+        echo: Number(cur.getFieldValue("ECHO"))
+      });
+    }
 
-      else if (cur.type === 'while_cond') {
-        const leftVal  = getValueFromBlock(cur.getInputTargetBlock("LEFT"));
-        const rightVal = getValueFromBlock(cur.getInputTargetBlock("RIGHT"));
-        const op       = cur.getFieldValue("OP");
+    else if (cur.type === 'while_cond') {
+      const leftVal  = getValueFromBlock(cur.getInputTargetBlock("LEFT"));
+      const rightVal = getValueFromBlock(cur.getInputTargetBlock("RIGHT"));
+      const op       = cur.getFieldValue("OP");
 
-        const innerBlock = cur.getInputTargetBlock("DO");
-        const innerSteps = innerBlock ? buildSequenceFrom(innerBlock) : [];
+      const innerBlock = cur.getInputTargetBlock("DO");
+      const innerSteps = innerBlock ? buildSequenceFrom(innerBlock) : [];
 
-        steps.push({
-          action: "whileCond",
-          cond_left: leftVal,
-          cond_op: op,
-          cond_right: rightVal,
-          steps: innerSteps
-        });
-      }
+      steps.push({
+        action: "whileCond",
+        cond_left: leftVal,
+        cond_op: op,
+        cond_right: rightVal,
+        steps: innerSteps
+      });
+    }
 
       else if (cur.type === 'tm1637_setup') {
         steps.push({
