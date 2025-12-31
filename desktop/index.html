@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Enc0dia alpha+</title>
+  <title>Enc0dia pre-beta</title>
 
   <!-- Blockly CDN -->
   <script src="./blockly.min.js"></script>
@@ -97,16 +97,15 @@
     flex-direction:row;
     align-items:flex-start;
     gap:20px;
-    margin-bottom:10px;
-">
+    margin-bottom:10px;">
 
-  <!-- Кнопки -->
+  <!-- Buttons -->
   <div>
     <button id="runBtn">Send to ESP32</button>
     <button id="stopBtn">STOP</button>
   </div>
 
-  <!-- Панель переменных -->
+  <!-- Panels -->
   <div id="variablesPanel" style="
       background:#f8f8f8;
       border:1px solid #ccc;
@@ -114,11 +113,11 @@
       min-width:200px;
       max-height:120px;
       overflow-y:auto;
-      font-family:monospace;
-  ">
+      font-family:monospace;">
       <h3 style="margin-top:0;">Variables</h3>
       <pre id="vars" style="margin:0;"></pre>
   </div>
+
   <div id="functionsPanel" style="
     background:#f8f8f8;
     border:1px solid #ccc;
@@ -126,16 +125,13 @@
     min-width:300px;
     max-height:200px;
     overflow-y:auto;
-    font-family:monospace;
-">
+    font-family:monospace;">
     <h3 style="margin-top:0;">Functions</h3>
     <pre id="funcs" style="margin:0; white-space:pre-wrap;"></pre>
+  </div>
 </div>
 
-
-</div>
-
-<!-- TOOLBOX -->
+<!-- Toolbox -->
 <xml id="toolbox" style="display: none">
   <category name="Basics" colour="#5ca65c">
     <block type="led_on"></block>
@@ -171,19 +167,19 @@
   </category>
 
   <category name="Analog Pins" colour="#4013bd">
-  <block type="analog_read"></block>
-  <block type="analog_write"></block>
+    <block type="analog_read"></block>
+    <block type="analog_write"></block>
   </category>
 
   <category name="Displays" colour="#1cbceb">
-  <block type="lcd_clear"></block>
-  <block type="lcd_print"></block>
-  <block type="lcd_setup"></block>
-  <block type="lcd_print_string"></block>
-  <block type="tm1637_setup"></block>
-  <block type="tm1637_show_number"></block>
+    <block type="lcd_clear"></block>
+    <block type="lcd_print"></block>
+    <block type="lcd_setup"></block>
+    <block type="lcd_print_string"></block>
+    <block type="tm1637_setup"></block>
+    <block type="tm1637_show_number"></block>
   <block type="tm1637_clear"></block>
-</category>
+  </category>
 
 <category name="Ultrasonic Sensor" colour="#bd13a6">
   <block type="ultrasonic_setup"></block>
@@ -206,9 +202,9 @@
 
 <script>
 
-  // ------------------- БЛОКИ -------------------
+  // Blocks
 
-  // Включить LED
+  // built-in Led on
   Blockly.Blocks['led_on'] = {
     init: function() {
       this.appendDummyInput().appendField("LED ON");
@@ -218,7 +214,7 @@
     }
   };
 
-  // Выключить LED
+  // Built-in Led off
   Blockly.Blocks['led_off'] = {
     init: function() {
       this.appendDummyInput().appendField("LED OFF");
@@ -228,6 +224,7 @@
     }
   };
 
+  // Analog read
   Blockly.Blocks['analog_read'] = {
   init: function() {
     this.appendDummyInput()
@@ -241,9 +238,10 @@
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour("#4013bd");
-  }
-};
+    }
+  };
 
+  // delay in ms
   Blockly.Blocks['delay_ms'] = {
     init: function() {
       this.appendValueInput("MS")
@@ -256,6 +254,7 @@
     }
   };
 
+  // Analog write
   Blockly.Blocks['analog_write'] = {
   init: function() {
     this.appendDummyInput()
@@ -269,11 +268,11 @@
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour("#4013bd");
-  }
-};
+    }
+  };
 
 
-  // Цикл "повтори N раз" (N — целое число)
+  // Repeat N times
   Blockly.Blocks['repeat_n'] = {
     init: function() {
       this.appendDummyInput()
@@ -287,7 +286,7 @@
     }
   };
 
-  // IF-блок
+  // IF-block
   Blockly.Blocks['if_block'] = {
     init: function() {
       this.appendValueInput("LEFT")
@@ -323,8 +322,7 @@
     }
   };
 
-  //variablesss
-
+  // Set int variable
   Blockly.Blocks['set_variable'] = {
     init: function() {
       this.appendDummyInput()
@@ -337,6 +335,7 @@
     }
   };
 
+  // Set string variable
   Blockly.Blocks['set_string_variable'] = {
   init: function() {
     this.appendDummyInput()
@@ -348,9 +347,10 @@
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour("#13bdac");
-  }
-};
+    }
+  };
 
+  // Change int variable aka set new value
   Blockly.Blocks['change_variable'] = {
     init: function() {
       this.appendDummyInput()
@@ -364,6 +364,7 @@
     }
   };
 
+  // Get intvariable value
   Blockly.Blocks['get_variable'] = {
     init: function() {
       this.appendDummyInput()
@@ -374,6 +375,7 @@
     }
   };
 
+  // Math expression
   Blockly.Blocks['math_expr'] = {
     init: function() {
       this.appendValueInput("LEFT")
@@ -392,6 +394,7 @@
     }
   };
 
+  // Digital read
   Blockly.Blocks['digital_read'] = {
   init: function() {
     this.appendDummyInput()
@@ -405,232 +408,248 @@
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour("#70bd13");
-  }
-};
+    }
+  };
 
-Blockly.Blocks['digital_write'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("Digital PIN")
-      .appendField(new Blockly.FieldNumber(5, 0, 39, 1), "PIN")
-      .appendField("= ")
-      .appendField(new Blockly.FieldDropdown([
-        ["HIGH", "1"],
-        ["LOW", "0"]
-      ]), "VALUE");
-
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#70bd13");
-  }
-};
-
-Blockly.Blocks['lcd_clear'] = {
-  init: function() {
-    this.appendDummyInput().appendField("LCD clear");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1cbceb");
-  }
-};
-
-Blockly.Blocks['lcd_print'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("LCD print")
-      .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1cbceb");
-  }
-};
-
-
-Blockly.Blocks['lcd_setup'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("LCD setup SDA")
-      .appendField(new Blockly.FieldNumber(21), "SDA")
-      .appendField("SCL")
-      .appendField(new Blockly.FieldNumber(22), "SCL");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1cbceb");
-  }
-};
-
-Blockly.Blocks['if_button'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("If button on PIN")
-      .appendField(new Blockly.FieldNumber(5, 0, 39, 1), "PIN")
-      .appendField("is pressed then");
-    
-    this.appendStatementInput("THEN")
-      .setCheck(null);
-
-    this.appendDummyInput()
-      .appendField("else");
-
-    this.appendStatementInput("ELSE")
-      .setCheck(null);
-
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#8a0f0f");
-  }
-};
-
-Blockly.Blocks['ultrasonic_setup'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("Ultrasonic setup TRIG")
-      .appendField(new Blockly.FieldNumber(12), "TRIG")
-      .appendField("ECHO")
-      .appendField(new Blockly.FieldNumber(14), "ECHO");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#bd13a6");
-  }
-};
-
-Blockly.Blocks['get_distance'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("distance (cm)");
-    this.setOutput(true, "Number");
-    this.setColour("#bd13a6");
-  }
-};
-
-Blockly.Blocks['while_cond'] = {
-  init: function() {
-    this.appendValueInput("LEFT")
-        .setCheck("Number")
-        .appendField("While");
-
-    this.appendDummyInput()
+  // Digital write
+  Blockly.Blocks['digital_write'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("Digital PIN")
+        .appendField(new Blockly.FieldNumber(5, 0, 39, 1), "PIN")
+        .appendField("= ")
         .appendField(new Blockly.FieldDropdown([
-          ["=", "=="],
-          ["!=", "!="],
-          [">", ">"],
-          ["<", "<"],
-          [">=", ">="],
-          ["<=", "<="]
-        ]), "OP");
+          ["HIGH", "1"],
+          ["LOW", "0"]
+        ]), "VALUE");
 
-    this.appendValueInput("RIGHT")
-        .setCheck("Number")
-        .appendField("do");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#70bd13");
+    }
+  };
 
-    this.appendStatementInput("DO")
+  // LCD clear
+  Blockly.Blocks['lcd_clear'] = {
+    init: function() {
+      this.appendDummyInput().appendField("LCD clear");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1cbceb");
+    }
+  };
+
+  // LCD print  
+  Blockly.Blocks['lcd_print'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("LCD print")
+        .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1cbceb");
+    }
+  };
+
+
+  // LCD init aka setup
+  Blockly.Blocks['lcd_setup'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("LCD setup SDA")
+        .appendField(new Blockly.FieldNumber(21), "SDA")
+        .appendField("SCL")
+        .appendField(new Blockly.FieldNumber(22), "SCL");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1cbceb");
+    }
+  };
+
+  // If button pressed
+  Blockly.Blocks['if_button'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("If button on PIN")
+        .appendField(new Blockly.FieldNumber(5, 0, 39, 1), "PIN")
+        .appendField("is pressed then");
+      
+      this.appendStatementInput("THEN")
         .setCheck(null);
 
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#8c660e");
-  }
-};
+      this.appendDummyInput()
+        .appendField("else");
 
-Blockly.Blocks['tm1637_setup'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("TM1637 setup CLK")
-      .appendField(new Blockly.FieldNumber(18, 0, 39, 1), "CLK")
-      .appendField("DIO")
-      .appendField(new Blockly.FieldNumber(19, 0, 39, 1), "DIO")
-      .appendField("brightness")
-      .appendField(new Blockly.FieldNumber(7, 0, 7, 1), "BRIGHT");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1CBCC8");
-  }
-};
+      this.appendStatementInput("ELSE")
+        .setCheck(null);
 
-Blockly.Blocks['tm1637_show_number'] = {
-  init: function() {
-    this.appendValueInput("VALUE")
-      .setCheck("Number")
-      .appendField("TM1637 show number");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1CBCC8");
-  }
-};
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#8a0f0f");
+    }
+  };
 
-Blockly.Blocks['tm1637_clear'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("TM1637 clear");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1CBCC8");
-  }
-};
+  // Ultrasonic init
+  Blockly.Blocks['ultrasonic_setup'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("Ultrasonic setup TRIG")
+        .appendField(new Blockly.FieldNumber(12), "TRIG")
+        .appendField("ECHO")
+        .appendField(new Blockly.FieldNumber(14), "ECHO");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#bd13a6");
+    }
+  };
 
-Blockly.Blocks['servo_setup'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("servo setup pin")
-      .appendField(new Blockly.FieldNumber(18, 0, 39, 1), "PIN");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#e67e22");
-  }
-};
+  // Get ultrasonic distance
+  Blockly.Blocks['get_distance'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("distance (cm)");
+      this.setOutput(true, "Number");
+      this.setColour("#bd13a6");
+    }
+  };
 
-Blockly.Blocks['servo_write'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("servo write angle")
-      .appendField(new Blockly.FieldNumber(90, 0, 180, 1), "ANGLE");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#e67e22");
-  }
-};
+  // While with condition
+  Blockly.Blocks['while_cond'] = {
+    init: function() {
+      this.appendValueInput("LEFT")
+          .setCheck("Number")
+          .appendField("While");
 
-Blockly.Blocks['lcd_print_string'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("LCD print string var")
-      .appendField(new Blockly.FieldTextInput("strVar"), "NAME");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#1cbceb");
-  }
-};
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["=", "=="],
+            ["!=", "!="],
+            [">", ">"],
+            ["<", "<"],
+            [">=", ">="],
+            ["<=", "<="]
+          ]), "OP");
 
-Blockly.Blocks['define_function'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("define function")
-      .appendField(new Blockly.FieldTextInput("myFunc", (value) => value.trim()), "NAME");
+      this.appendValueInput("RIGHT")
+          .setCheck("Number")
+          .appendField("do");
 
-    this.appendStatementInput("BODY")
-      .setCheck(null)
-      .appendField("do");
+      this.appendStatementInput("DO")
+          .setCheck(null);
 
-    this.setColour("#4013bd");
-    this.setNextStatement(true);
-    this.setPreviousStatement(true);
-  }
-};
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#8c660e");
+    }
+  };
 
-Blockly.Blocks['call_function'] = {
-  init: function() {
-    this.appendDummyInput()
-      .appendField("call function")
-      .appendField(new Blockly.FieldTextInput("myFunc", (value) => value.trim()), "NAME");
+  // TM1637 setup
+  Blockly.Blocks['tm1637_setup'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("TM1637 setup CLK")
+        .appendField(new Blockly.FieldNumber(18, 0, 39, 1), "CLK")
+        .appendField("DIO")
+        .appendField(new Blockly.FieldNumber(19, 0, 39, 1), "DIO")
+        .appendField("brightness")
+        .appendField(new Blockly.FieldNumber(7, 0, 7, 1), "BRIGHT");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1CBCC8");
+    }
+  };
 
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#4013bd");
-  }
-};
+  // TM1637 show number
+  Blockly.Blocks['tm1637_show_number'] = {
+    init: function() {
+      this.appendValueInput("VALUE")
+        .setCheck("Number")
+        .appendField("TM1637 show number");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1CBCC8");
+    }
+  };
+
+  // TM1637 clear
+  Blockly.Blocks['tm1637_clear'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("TM1637 clear");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1CBCC8");
+    }
+  };
+
+  // Servo init
+  Blockly.Blocks['servo_setup'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("servo setup pin")
+        .appendField(new Blockly.FieldNumber(18, 0, 39, 1), "PIN");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#e67e22");
+    }
+  };
+
+  // Servo write angle
+  Blockly.Blocks['servo_write'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("servo write angle")
+        .appendField(new Blockly.FieldNumber(90, 0, 180, 1), "ANGLE");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#e67e22");
+    }
+  };
+
+  // LCD print string variable
+  Blockly.Blocks['lcd_print_string'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("LCD print string var")
+        .appendField(new Blockly.FieldTextInput("strVar"), "NAME");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#1cbceb");
+    }
+  };
+
+  // Define function
+  Blockly.Blocks['define_function'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("define function")
+        .appendField(new Blockly.FieldTextInput("myFunc", (value) => value.trim()), "NAME");
+
+      this.appendStatementInput("BODY")
+        .setCheck(null)
+        .appendField("do");
+
+      this.setColour("#4013bd");
+      this.setNextStatement(true);
+      this.setPreviousStatement(true);
+    }
+  };
+
+  // Call function
+  Blockly.Blocks['call_function'] = {
+    init: function() {
+      this.appendDummyInput()
+        .appendField("call function")
+        .appendField(new Blockly.FieldTextInput("myFunc", (value) => value.trim()), "NAME");
+
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour("#4013bd");
+    }
+  };
 
 
-  // ------------------- ИНИЦИАЛИЗАЦИЯ BLOCKLY -------------------
+  // ------------------- BLOCKLY INITIALIZATION -------------------
 
   const workspace = Blockly.inject('blocklyDiv', {
     toolbox: document.getElementById('toolbox'),
@@ -640,19 +659,15 @@ Blockly.Blocks['call_function'] = {
 
   // --------------------- VALUE PARSER ---------------------
 
-  // Возвращает:
-  // - число        -> Number (может быть float)
-  // - переменная   -> string (имя)
-  // - выражение    -> { expr:true, left:..., op:..., right:... }
   function getValueFromBlock(block) {
     if (!block) return 0;
 
     if (block.type === "math_number") {
-      return Number(block.getFieldValue("NUM")); // int или float
+      return Number(block.getFieldValue("NUM")); 
     }
 
     if (block.type === "get_variable") {
-      return block.getFieldValue("NAME"); // имя переменной
+      return block.getFieldValue("NAME"); 
     }
 
     if (block.type === "math_expr") {
@@ -668,70 +683,68 @@ Blockly.Blocks['call_function'] = {
     }
 
     if (block.type === "get_distance") {
-    return "distance"; // имя переменной на ESP32
+    return "distance"; 
     }
-
-
     return 0;
   }
 
-  // ------------------- РЕКУРСИЯ: ЧТЕНИЕ БЛОКОВ -------------------
+  // ------------------- BLOCK READING -------------------
 
 function buildSequenceFrom(block) {
-    let steps = [];
-    let cur = block;
+  let steps = [];
+  let cur = block;
 
-    while (cur) {
+  while (cur) {
 
-      if (cur.type === 'led_on') {
-        steps.push({ action: "ledOn" });
-      }
+    if (cur.type === 'led_on') {
+      steps.push({ action: "ledOn" });
+    }
 
-      else if (cur.type === 'lcd_print_string') {
-        steps.push({
-          action: "lcdPrintVar",
-          name: cur.getFieldValue("NAME")
-        });
-      }
+    else if (cur.type === 'lcd_print_string') {
+      steps.push({
+        action: "lcdPrintVar",
+        name: cur.getFieldValue("NAME")
+      });
+    }
 
-      else if (cur.type === 'set_string_variable') {
-        steps.push({
-          action: "setVarString",
-          name: cur.getFieldValue("NAME"),
-          text: cur.getFieldValue("TEXT")
-        });
-      }
+    else if (cur.type === 'set_string_variable') {
+      steps.push({
+        action: "setVarString",
+        name: cur.getFieldValue("NAME"),
+        text: cur.getFieldValue("TEXT")
+      });
+    }
 
-      else if (cur.type === 'digital_read') {
-        const pin = Number(cur.getFieldValue("PIN"));
-        const variable = cur.getFieldValue("VAR");
+    else if (cur.type === 'digital_read') {
+      const pin = Number(cur.getFieldValue("PIN"));
+      const variable = cur.getFieldValue("VAR");
 
-        steps.push({
-          action: "digitalRead",
-          pin: pin,
-          var: variable
-        });
-      }
+      steps.push({
+        action: "digitalRead",
+        pin: pin,
+        var: variable
+      });
+    }
 
-      else if (cur.type === 'led_off') {
-        steps.push({ action: "ledOff" });
-      }
+    else if (cur.type === 'led_off') {
+      steps.push({ action: "ledOff" });
+    }
 
-      else if (cur.type === 'delay_ms') {
-        const msVal = getValueFromBlock(cur.getInputTargetBlock("MS"));
-        steps.push({ action: "delay", ms: msVal });
-      }
+    else if (cur.type === 'delay_ms') {
+      const msVal = getValueFromBlock(cur.getInputTargetBlock("MS"));
+      steps.push({ action: "delay", ms: msVal });
+    }
 
-      else if (cur.type === 'repeat_n') {
-        const times = Number(cur.getFieldValue("TIMES")) || 1;
-        const innerBlock = cur.getInputTargetBlock("DO");
-        const innerSteps = innerBlock ? buildSequenceFrom(innerBlock) : [];
-        steps.push({
-          action: "repeat",
-          times: times,
-          steps: innerSteps
-        });
-      }
+    else if (cur.type === 'repeat_n') {
+      const times = Number(cur.getFieldValue("TIMES")) || 1;
+      const innerBlock = cur.getInputTargetBlock("DO");
+      const innerSteps = innerBlock ? buildSequenceFrom(innerBlock) : [];
+      steps.push({
+        action: "repeat",
+        times: times,
+        steps: innerSteps
+      });
+    }
 
       else if (cur.type === 'if_block') {
         const leftVal  = getValueFromBlock(cur.getInputTargetBlock("LEFT"));
