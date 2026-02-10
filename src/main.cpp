@@ -330,90 +330,90 @@ void executeStep(JsonObject step) {
      ledcSetup(channel, 5000, 8);  
       ledcWrite(channel, duty);
 
-     addLog("[STEP] analogWrite pin " + String(pin) + " = " + String(duty));//!edditing+formatting stopped here!
+     addLog("[STEP] analogWrite pin " + String(pin) + " = " + String(duty));
   }
 
-else if (strcmp(action, "lcdInit") == 0) {
-    int addr = step["addr"] | 0x27;
-    lcd = LiquidCrystal_I2C(addr, 16, 2);
-    lcd.init();
-    lcd.backlight();
-    lcdInitialized = true;
-    addLog("[LCD] init addr=0x" + String(addr, HEX));
-}
+  else if (strcmp(action, "lcdInit") == 0) {
+      int addr = step["addr"] | 0x27;
+      lcd = LiquidCrystal_I2C(addr, 16, 2);
+      lcd.init();
+      lcd.backlight();
+      lcdInitialized = true;
+      addLog("[LCD] init addr=0x" + String(addr, HEX));
+  }
 
-else if (strcmp(action, "lcdClear") == 0) {
-    if (lcdInitialized) lcd.clear();
-    addLog("[LCD] clear");
-}
+  else if (strcmp(action, "lcdClear") == 0) {
+      if (lcdInitialized) lcd.clear();
+      addLog("[LCD] clear");
+  }
 
-else if (strcmp(action, "lcdPrint") == 0) {
-    if (!lcdInitialized) {
-        addLog("[LCD] ERROR: lcdPrint before lcdSetup");
-        return;
-    }
+  else if (strcmp(action, "lcdPrint") == 0) {
+      if (!lcdInitialized) {
+          addLog("[LCD] ERROR: lcdPrint before lcdSetup");
+          return;
+      }
 
-    const char* txt = step["text"] | "";
-    String s = txt;
+  const char* txt = step["text"] | "";
+  String s = txt;
 
-    //Ошибка, если слишком длинно
-    if (s.length() > 32) {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("TEXT TOO LONG!!!");
-        addLog("[LCD PRINT] ERROR: text > 32 chars");
-        return;
-    }
+  //error if too long
+  if (s.length() > 32) {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("TEXT TOO LONG!!!");
+      addLog("[LCD PRINT] ERROR: text > 32 chars");
+      return;
+  }
 
-    //Готовим строки
-    String line1 = s.substring(0, std::min(16U, s.length()));
-    String line2 = (s.length() > 16) ? s.substring(16) : "";
+    //strijhng into 2 lines if needed
+  String line1 = s.substring(0, std::min(16U, s.length()));
+  String line2 = (s.length() > 16) ? s.substring(16) : "";
+  
+  lcd.clear();
 
-    lcd.clear();
+  //first line
+  lcd.setCursor(0, 0);
+  lcd.print(line1);
 
-    //Первая_строка
-    lcd.setCursor(0, 0);
-    lcd.print(line1);
+  //second line if existing
+  if (line2.length() > 0) {
+      lcd.setCursor(0, 1);
+      lcd.print(line2);
+  }
 
-    //Вторая строка (если есть)
-    if (line2.length() > 0) {
-        lcd.setCursor(0, 1);
-        lcd.print(line2);
-    }
-
-    addLog("[LCD PRINT] '" + s + "'");
-}
-
-
-else if (strcmp(action, "lcdSetup") == 0) {
-    int sda = step["sda"] | 21;
-    int scl = step["scl"] | 22;
-
-    addLog("[LCD] setup SDA=" + String(sda) + " SCL=" + String(scl) + " addr=0x27");
-
-    Wire.begin(sda, scl);
-
-    lcd = LiquidCrystal_I2C(0x27, 16, 2);
-    lcd.init();
-    lcd.backlight();
-
-    lcdInitialized = true;
+  addLog("[LCD PRINT] '" + s + "'");
 }
 
 
-else if (strcmp(action, "analogRead") == 0) {
-    int pin = step["pin"] | 0;
-    const char* var = step["var"] | "";
+  else if (strcmp(action, "lcdSetup") == 0) {
+      int sda = step["sda"] | 21;
+      int scl = step["scl"] | 22;
 
-    pinMode(pin, INPUT);
-    int raw = analogRead(pin);   // 0–4095 на ESP32
+      addLog("[LCD] setup SDA=" + String(sda) + " SCL=" + String(scl) + " addr=0x27");
 
-    float value = (float)raw;
+      Wire.begin(sda, scl);
 
-    variables[var] = value;
+      lcd = LiquidCrystal_I2C(0x27, 16, 2);
+      lcd.init();
+      lcd.backlight();
 
-    addLog("[STEP] analogRead pin " + String(pin) + " = " + String(raw) + " -> var " + String(var) + " (" + String(value, 2) + ")");
+      lcdInitialized = true;
 }
+
+
+  else if (strcmp(action, "analogRead") == 0) {
+      int pin = step["pin"] | 0;
+      const char* var = step["var"] | "";
+
+      pinMode(pin, INPUT);
+      int raw = analogRead(pin);   
+
+      float value = (float)raw;
+
+      variables[var] = value;
+
+      addLog("[STEP] analogRead pin " + String(pin) + " = " + String(raw) + " -> var " + String(var) + " (" + String(value, 2) + ")");
+  }
 
   else if (strcmp(action, "digitalWrite") == 0) {
       int pin = step["pin"] | 0;
@@ -433,7 +433,7 @@ else if (strcmp(action, "analogRead") == 0) {
       pinMode(pin, INPUT);
       int result = digitalRead(pin);
 
-      variables[var] = (float)result;   // как float (0.0 или 1.0)
+      variables[var] = (float)result;   // as float (0.0 or 1.0)
 
       addLog("[STEP] digitalRead pin " + String(pin) + " = " + String(result) + " -> var " + String(var));
   }
@@ -520,7 +520,7 @@ else if (strcmp(action, "analogRead") == 0) {
         ExecFrame frame;
         frame.steps = step["steps"].as<JsonArray>();
         frame.index = 0;
-        frame.repeatRemaining = -2; // специальный код WHILE
+        frame.repeatRemaining = -2; 
         execStack.push_back(frame);
     }
   }
@@ -619,26 +619,25 @@ else if (strcmp(action, "analogRead") == 0) {
   }
 }
 
-// Обработка всей программы асинхронно
-// Обработка всей программы асинхронно
+// asynchronic program execution: we check the top of the exec stack, execute one step if its time has come, and manage control flow (repeat/if/while/callFunc) by pushing/popping frames
 void processProgram() {
   if (!programRunning) return;
 
   unsigned long now = millis();
   if (now < nextActionTime) return;
 
-  // Выполняем максимум ОДНО атомарное действие за вызов
+  // executing one step at a time, managing the stack for control flow
   while (!execStack.empty()) {
 
     ExecFrame &frame = execStack.back();
 
-    // Дошли до конца блока
+    // end of current block
     if (frame.index >= frame.steps.size()) {
 
-      // ===== WHILE цикл =====
+      // while loop special handling: we need to re-evaluate the condition and either repeat the block or exit
       if (frame.repeatRemaining == -2) {
 
-        // Родительская рамка (где лежит объект whileCond)
+        // parental frame)
         ExecFrame &parent = execStack[execStack.size() - 2];
         JsonObject whileObj = parent.steps[parent.index - 1];
 
@@ -660,42 +659,42 @@ void processProgram() {
         addLog("[WHILE] re-eval => " + String(cond ? "TRUE" : "FALSE"));
 
         if (cond) {
-            frame.index = 0;      // повторяем тело
+            frame.index = 0;      // body repeat
             continue;
         } else {
-            execStack.pop_back(); // выходим из цикла
+            execStack.pop_back(); // exiting the loop
             continue;
         }
       }
 
-      // ===== Обычный repeat =====
+      // classic repeat handling
       if (frame.repeatRemaining > 1) {
         frame.repeatRemaining--;
         frame.index = 0;
         continue;
       }
 
-      // ===== Завершение блока =====
+      // block finished, pop the stack
       execStack.pop_back();
       continue;
     }
 
-    // Взять шаг и выполнить
+    // take the step and execute
     JsonObject step = frame.steps[frame.index].as<JsonObject>();
     frame.index++;
 
     if (!step.isNull()) {
       executeStep(step);
-      return;  // выполняем только один шаг за цикл
+      return;  // one step at a time, wait for the next loop to check if we can execute the next one
     }
   }
 
-  // Программа закончилась
+  // program ended
   programRunning = false;
   addLog("[PROGRAM] finished");
 }
 
-// ---------- HTTP обработчики ----------
+// http handlers for receiving the program and controlling execution
 
 void handleOptionsRun() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -715,7 +714,7 @@ void handleRun() {
 
   String body = server.arg("plain");
 
-  // Очищаем старое состояние
+  // clearing current state
   programDoc.clear();
   execStack.clear();
   variables.clear();
