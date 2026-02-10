@@ -886,52 +886,52 @@ function buildSequenceFrom(block) {
       });
     }
 
-      else if (cur.type === 'tm1637_setup') {
-        steps.push({
-          action: "tm1637Setup",
-          clk: Number(cur.getFieldValue("CLK")),
-          dio: Number(cur.getFieldValue("DIO")),
-          brightness: Number(cur.getFieldValue("BRIGHT"))
-        });
-      }
+    else if (cur.type === 'tm1637_setup') {
+      steps.push({
+        action: "tm1637Setup",
+        clk: Number(cur.getFieldValue("CLK")),
+        dio: Number(cur.getFieldValue("DIO")),
+        brightness: Number(cur.getFieldValue("BRIGHT"))
+      });
+    }
 
-      else if (cur.type === 'tm1637_show_number') {
-        const val = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
-        steps.push({
-          action: "tm1637ShowNumber",
-          value: val
-        });
-      }
+    else if (cur.type === 'tm1637_show_number') {
+      const val = getValueFromBlock(cur.getInputTargetBlock("VALUE"));
+      steps.push({
+        action: "tm1637ShowNumber",
+        value: val
+      });
+    }
 
-      else if (cur.type === 'tm1637_clear') {
-        steps.push({
-          action: "tm1637Clear"
-        });
-      }
+    else if (cur.type === 'tm1637_clear') {
+      steps.push({
+        action: "tm1637Clear"
+      });
+    }
 
-      else if (cur.type === 'servo_setup') {
-        steps.push({
-          action: "servoSetup",
-          pin: Number(cur.getFieldValue("PIN"))
-        });
-      }
+    else if (cur.type === 'servo_setup') {
+      steps.push({
+        action: "servoSetup",
+        pin: Number(cur.getFieldValue("PIN"))
+      });
+    }
 
-      else if (cur.type === 'servo_write') {
-        steps.push({
-          action: "servoWrite",
-          angle: Number(cur.getFieldValue("ANGLE"))
-        });
-      }
+    else if (cur.type === 'servo_write') {
+      steps.push({
+        action: "servoWrite",
+        angle: Number(cur.getFieldValue("ANGLE"))
+      });
+    }
 
-      else if (cur.type == 'call_function') {
-        const name = (cur.getFieldValue("NAME") || "").trim();
-        steps.push({
-          action: "callFunc",
-          name: name
-        });
-      }
+    else if (cur.type == 'call_function') {
+      const name = (cur.getFieldValue("NAME") || "").trim();
+      steps.push({
+        action: "callFunc",
+        name: name
+      });
+    }
 
-      cur = cur.getNextBlock();
+    cur = cur.getNextBlock();
     }
 
     return steps;
@@ -1035,9 +1035,6 @@ function buildProgram() {
   const definitionSteps = [];
   const { functions, errors: functionErrors } = collectFunctionDefinitions();
 
-  // Emit defineFunc steps so firmware always receives and logs definitions,
-  // even if the functions object gets dropped or the user sends only function
-  // blocks without a caller.
   Object.entries(functions).forEach(([name, body]) => {
     definitionSteps.push({
       action: "defineFunc",
@@ -1046,7 +1043,7 @@ function buildProgram() {
     });
   });
 
-  // === Основная программа: только topBlocks, но игнорируем define ===
+  // Main sequence is built only from top-level blocks that are not function definitions.
   const topBlocks = workspace.getTopBlocks(true);
 
   topBlocks.forEach(block => {
@@ -1081,7 +1078,7 @@ function validateProgram(program, effectiveFunctions) {
 }
 
 
-  // ------------------- ОТПРАВКА ПРОГРАММЫ НА ESP -------------------
+  // ------------------- SENDING TO ESP -------------------
 
 document.getElementById("runBtn").onclick = async () => {
   const program = buildProgram();
@@ -1092,7 +1089,7 @@ document.getElementById("runBtn").onclick = async () => {
     return;
   }
 
-  // --- получаем список функций, реально существующих в ESP ---
+  // list of existing functions on esp
   let espFunctions = {};
   try {
     espFunctions = await fetch("http://192.168.4.1/functions").then(r => r.json());
@@ -1100,7 +1097,7 @@ document.getElementById("runBtn").onclick = async () => {
 
   const espFunctionNames = new Set(Object.keys(espFunctions));
 
-  // --- проверяем call_function блоки ---
+  // call_function blocks validation: check if all called functions are defined (either in current program or already on ESP)
   const callBlocks = workspace.getBlocksByType("call_function", true);
   const errors = [];
 
@@ -1118,7 +1115,7 @@ document.getElementById("runBtn").onclick = async () => {
     return;
   }
 
-  // ———— теперь отправка ТОЛЬКО steps, без functions ————
+  // sending only main steps without function definitions, because functions are already sent as separate entities and stored on ESP
   const payload = JSON.stringify({ steps }, null, 2);
   console.log("Sending:", payload);
 
@@ -1138,7 +1135,7 @@ document.getElementById("runBtn").onclick = async () => {
 };
 
 
-  // === 2. логика разделителя ===
+//------------------- PANEL RESIZING -------------------
 const divider = document.getElementById("divider");
 let dragging = false;
 
@@ -1159,7 +1156,7 @@ document.addEventListener("mousemove", (e) => {
   if (newLeft > rect.width - 200) return;
 
   leftPane.style.width = newLeft + "px";
-  Blockly.svgResize(workspace);  // обновить Blockly
+  Blockly.svgResize(workspace);  
 });
 
 document.addEventListener("mouseup", () => {
@@ -1198,7 +1195,7 @@ async function updateFuncsFromESP() {
         lines.push("  - " + describeStep(step));
       });
 
-      lines.push(""); // пустая строка между функциями
+      lines.push(""); 
     }
 
     document.getElementById("funcs").textContent =
@@ -1208,7 +1205,7 @@ async function updateFuncsFromESP() {
   }
 }
 
-// обновлять панель 3 раза в секунду
+//panel update and update inervals
 setInterval(updateVars, 300);
 setInterval(updateFuncsFromESP, 500);
 
