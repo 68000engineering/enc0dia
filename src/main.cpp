@@ -9,7 +9,7 @@
 #include <TM1637Display.h>
 #include <Servo.h>
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);   // по умолчанию
+LiquidCrystal_I2C lcd(0x27, 16, 2);   
 bool lcdInitialized = false;
 
 TM1637Display* tm1637 = nullptr;
@@ -32,9 +32,9 @@ const char* password = "12345678";
 
 WebServer server(80);
 
-const int LED_PIN = 2;  // встроенный LED для большинства ESP32
+const int LED_PIN = 2;  // inbuilt LED definition
 
-// ---------- Глобальное хранилище программы ----------
+// global document for the currently running program (steps + function definitions)
 
 DynamicJsonDocument programDoc(65536);
 
@@ -43,11 +43,11 @@ DynamicJsonDocument functionsCache(32768);
 
 JsonObject functionsObj;
 
-// Кадр выполнения: массив шагов + текущий индекс + оставшиеся повторы
+// execution stack frame for repeat/if/while/callFunc blocks. Each frame has its own steps array and index, and for repeat also a counter of remaining iterations.
 struct ExecFrame {
   JsonArray steps;
   size_t index;
-  int repeatRemaining;  // 1 для обычного блока, >1 для repeat
+  int repeatRemaining;  // >1 for repeat, -2 for while, 1 for normal blocks
 };
 
 std::vector<ExecFrame> execStack;
@@ -100,12 +100,12 @@ void logFunctionDefinitions(const char* prefix) {
   }
 }
 
-// ---------- Вспомогательные функции ----------
+// additional functions to resolve values and expressions in steps, supporting numbers, variables, and simple binary expressions
 
 float resolveValue(JsonVariant v);        
 float resolveExpression(JsonObject expr); 
 
-// Вычисление выражения вида { expr:true, left:..., op:"+", right:... }
+// expression format: {expr:true, left:..., right:..., op:"+"} where left and right can be numbers, variable names, or nested expressions
 float resolveExpression(JsonObject expr) {
   JsonVariant leftV = expr["left"];
   JsonVariant rightV = expr["right"];
@@ -124,10 +124,7 @@ float resolveExpression(JsonObject expr) {
   return 0.0f;
 }
 
-// Универсальное получение числа из JsonVariant:
-// - число -> float
-// - строка -> имя переменной -> значение
-// - объект с {expr:true,...} -> вычислить выражение
+// getting value
 float resolveValue(JsonVariant v) {
   if (v.is<float>()) {
     return v.as<float>();
@@ -136,25 +133,25 @@ float resolveValue(JsonVariant v) {
     return (float)v.as<int>();
   }
 
-  // выражение?
-  if (v.is<JsonObject>()) {
-    JsonObject obj = v.as<JsonObject>();
-    if (obj.containsKey("expr")) {
-      return resolveExpression(obj);
-    }
+// expressions
+if (v.is<JsonObject>()) {
+  JsonObject obj = v.as<JsonObject>();
+  if (obj.containsKey("expr")) {
+    return resolveExpression(obj);
   }
+}
 
-  // строка = имя переменной
-  if (v.is<const char*>()) {
-    String name = v.as<const char*>();
-    auto it = variables.find(name);
-    if (it != variables.end()) {
-      return it->second;
-    }
-    return 0.0f;
+// string variable 
+if (v.is<const char*>()) {
+  String name = v.as<const char*>();
+  auto it = variables.find(name);
+  if (it != variables.end()) {
+     return it->second;
   }
-
   return 0.0f;
+}
+
+return 0.0f;
 }
 
 void addLog(String s) {
@@ -171,9 +168,9 @@ void updateUltrasonic() {
     if (!usEnabled) return;
 
     unsigned long now = millis();
-    if (now < usNextRead) return;  // ждём 500 мс
+    if (now < usNextRead) return;  
 
-    usNextRead = now + 500;  // следующее измерение через 500мс
+    usNextRead = now + 500;  
 
     // TRIGGER impulse
     digitalWrite(usTrigPin, LOW);
@@ -186,18 +183,18 @@ void updateUltrasonic() {
     long duration = pulseIn(usEchoPin, HIGH, 25000); // timeout 25ms
 
     if (duration == 0) {
-        usLastDistance = -1;  // нет сигнала
+        usLastDistance = -1;  // no signal
     } else {
-        usLastDistance = duration / 58.0;  // в сантиметрах
+        usLastDistance = duration / 58.0;  // to cm 
     }
 
-    variables["distance"] = usLastDistance;  // обновляем глобальную переменную
+    variables["distance"] = usLastDistance;  // global var updateю
 }
-// Выполнить один "атомарный" шаг (без раскрытия repeat/if — они создают новые фреймы)
+// executing one micro step without repeat/ if
 void executeStep(JsonObject step) {
   const char* action = step["action"] | "";
   unsigned long now = millis();
-  nextActionTime = now;  // по умолчанию следующую команду можно сразу
+  nextActionTime = now;  
 
   if (strcmp(action, "ledOn") == 0) {
     digitalWrite(LED_PIN, HIGH);
@@ -212,7 +209,7 @@ void executeStep(JsonObject step) {
           return;
       }
 
-      String s = stringVars[name];   // из stringVars
+      String s = stringVars[name];   
 
       if (s.length() > 16) s = s.substring(0, 16);
 
@@ -259,7 +256,7 @@ void executeStep(JsonObject step) {
 
 
   else if (strcmp(action, "tm1637Setup") == 0) {
-      int clk = step["clk"] | 18;       // пины по умолчанию, подправь под свою схему
+      int clk = step["clk"] | 18;       
       int dio = step["dio"] | 19;
       int brightness = step["brightness"] | 7; // 0..7
 
@@ -286,7 +283,6 @@ void executeStep(JsonObject step) {
       float v = resolveValue(step["value"]);
       int iv = (int)v;
 
-      // показываем число (4 разряда, с ведущими нулями)
       tm1637->showNumberDec(iv, false);
 
       addLog("[TM1637] showNumber " + String(iv));
@@ -306,7 +302,7 @@ void executeStep(JsonObject step) {
     int pin = step["pin"] | 0;
     pinMode(pin, INPUT);
 
-    int val = digitalRead(pin);  // 1 = нажата (если кнопка подтянута к VCC)
+    int val = digitalRead(pin);
     bool pressed = (val == HIGH);
 
     addLog("[BUTTON] pin " + String(pin) + " = " + String(val) + " -> " + (pressed ? "PRESSED" : "NOT PRESSED"));
@@ -324,18 +320,18 @@ void executeStep(JsonObject step) {
     }
 }
 
-else if (strcmp(action, "analogWrite") == 0) {
-    int pin = step["pin"] | 0;
-    float v = resolveValue(step["value"]);
-    int duty = constrain((int)v, 0, 255);
+  else if (strcmp(action, "analogWrite") == 0) {
+      int pin = step["pin"] | 0;
+      float v = resolveValue(step["value"]);
+      int duty = constrain((int)v, 0, 255);
 
-    int channel = pin % 16;  // простой канал = номер пина
-    ledcAttachPin(pin, channel);
-    ledcSetup(channel, 5000, 8);  // 5kHz, 8 бит (0–255)
-    ledcWrite(channel, duty);
+      int channel = pin % 16;  
+      ledcAttachPin(pin, channel);
+     ledcSetup(channel, 5000, 8);  
+      ledcWrite(channel, duty);
 
-    addLog("[STEP] analogWrite pin " + String(pin) + " = " + String(duty));
-}
+     addLog("[STEP] analogWrite pin " + String(pin) + " = " + String(duty));//!edditing+formatting stopped here!
+  }
 
 else if (strcmp(action, "lcdInit") == 0) {
     int addr = step["addr"] | 0x27;
