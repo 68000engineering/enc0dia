@@ -803,7 +803,7 @@ void setup() {
     JsonDocument doc;
     JsonObject root = doc.to<JsonObject>();
 
-    ensureFunctionsObject(); // убедиться, что функции подгружены
+    ensureFunctionsObject(); // check if we have a valid functions object to read from
 
     for (JsonPair kv : functionsObj) {
       const char* name = kv.key().c_str();
