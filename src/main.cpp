@@ -601,16 +601,17 @@ void executeStep(JsonObject step) {
 
       ensureFunctionsObject();
 
-      functionsObj[name] = body;
-      JsonArray arr = functionsObj[name].to<JsonArray>();
-      arr.clear(); 
+      // IMPORTANT: copy step array into programDoc-owned storage.
+      // Do NOT assign then clear, because that can clear the original array (shared reference).
+      JsonArray dst = functionsObj[name].to<JsonArray>();
+      dst.clear();
       for (JsonVariant v : body) {
-        arr.add(v);
+        dst.add(v);
       }
 
-    // cache update 
-    functionsCache[name] = arr;
-    addLog(String("[FUNC] defined ") + name + " (" + String(body.size()) + " steps)");
+      // cache update (copy into separate doc so functions survive between runs)
+      functionsCache[name].set(dst);
+      addLog(String("[FUNC] defined ") + name + " (" + String(dst.size()) + " steps)");
     }
 
   else {

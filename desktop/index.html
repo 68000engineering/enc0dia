@@ -931,6 +931,22 @@ function buildSequenceFrom(block) {
       });
     }
 
+    // Allow declaring functions inline (including inside loops/ifs/whiles).
+    // This emits a runtime defineFunc step exactly where the block appears in the sequence.
+    else if (cur.type === 'define_function') {
+      const rawName = cur.getFieldValue("NAME") || "";
+      const name = rawName.trim();
+
+      const bodyBlock = cur.getInputTargetBlock("BODY");
+      const bodySteps = bodyBlock ? buildSequenceFrom(bodyBlock) : [];
+
+      steps.push({
+        action: "defineFunc",
+        name,
+        steps: bodySteps,
+      });
+    }
+
     cur = cur.getNextBlock();
     }
 
@@ -944,7 +960,8 @@ function collectFunctionDefinitions() {
   const errors = [];
   const seenNames = new Set();
 
-  const allBlocks = workspace.getBlocksByType("define_function", false);
+  // true => include nested blocks (definitions inside loops etc.)
+  const allBlocks = workspace.getBlocksByType("define_function", true);
 
   allBlocks.forEach(block => {
     const rawName = block.getFieldValue("NAME") || "";
@@ -1032,27 +1049,18 @@ function describeStep(step) {
 
 function buildProgram() {
   const steps = [];
-  const definitionSteps = [];
   const { functions, errors: functionErrors } = collectFunctionDefinitions();
 
-  Object.entries(functions).forEach(([name, body]) => {
-    definitionSteps.push({
-      action: "defineFunc",
-      name,
-      steps: body,
-    });
-  });
-
-  // Main sequence is built only from top-level blocks that are not function definitions.
+  // Main sequence is built from all top-level blocks.
+  // Function declarations are emitted inline via buildSequenceFrom (see define_function case).
   const topBlocks = workspace.getTopBlocks(true);
 
   topBlocks.forEach(block => {
-    if (block.type === "define_function") return;
     const seq = buildSequenceFrom(block);
     steps.push(...seq);
   });
 
-  return { steps: [...definitionSteps, ...steps], functions, definitionErrors: functionErrors };
+  return { steps, functions, definitionErrors: functionErrors };
 }
 
 function validateProgram(program, effectiveFunctions) {
@@ -1095,27 +1103,16 @@ document.getElementById("runBtn").onclick = async () => {
     espFunctions = await fetch("http://192.168.4.1/functions").then(r => r.json());
   } catch (_) {}
 
-  const espFunctionNames = new Set(Object.keys(espFunctions));
-
-  // call_function blocks validation: check if all called functions are defined (either in current program or already on ESP)
-  const callBlocks = workspace.getBlocksByType("call_function", true);
-  const errors = [];
-
-  callBlocks.forEach(block => {
-    const rawName = block.getFieldValue("NAME") || "";
-    const name = rawName.trim();
-
-    if (!espFunctionNames.has(name)) {
-      errors.push(`Call to undefined function '${name}'`);
-    }
-  });
+  // Validate calls against functions defined in the current program OR already cached on ESP.
+  const effectiveFunctions = { ...espFunctions, ...(program.functions || {}) };
+  const errors = validateProgram(program, effectiveFunctions);
 
   if (errors.length > 0) {
     alert(`Cannot send program:\n${errors.join("\n")}`);
     return;
   }
 
-  // sending only main steps without function definitions, because functions are already sent as separate entities and stored on ESP
+  // Sending steps as-is (including inline defineFunc steps if present)
   const payload = JSON.stringify({ steps }, null, 2);
   console.log("Sending:", payload);
 
