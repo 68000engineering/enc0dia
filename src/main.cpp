@@ -775,7 +775,7 @@ void handleRun() {
     }
     logFunctionDefinitions("[FUNC]   - ");
   } else if (hasDefineSteps) {
-    addLog("[FUNC] No preloaded definitions; will register from defineFunc steps");
+    addLog("[FUNC] No preloaded definitions; registering from defineFunc steps");
   } else {
     addLog("[FUNC] No function definitions provided or cached");
   }
