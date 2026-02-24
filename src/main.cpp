@@ -695,6 +695,22 @@ void processProgram() {
   addLog("[PROGRAM] finished");
 }
 
+
+void clearAllFunctions() {
+  // Clear function definitions from both the current program payload and the persistent cache.
+  JsonObject f = programDoc["functions"].as<JsonObject>();
+  if (!f.isNull()) {
+    f.clear();
+  }
+  functionsCache.clear();
+  ensureFunctionsObject(); // rebind functionsObj to an empty object
+}
+
+void clearAllVariables() {
+  variables.clear();
+  stringVars.clear();
+}
+
 // http handlers for receiving the program and controlling execution
 
 void handleOptionsRun() {
@@ -858,6 +874,35 @@ void setup() {
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "text/plain", "Log cleared");
 });
+
+  // Clear function definitions (cache + current payload)
+  server.on("/clearfunctions", HTTP_OPTIONS, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    server.send(204);
+  });
+  server.on("/clearfunctions", HTTP_POST, []() {
+    clearAllFunctions();
+    addLog("[FUNC] Cleared all function definitions by user");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "text/plain", "Functions cleared");
+  });
+
+  // Clear variables
+  server.on("/clearvars", HTTP_OPTIONS, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    server.send(204);
+  });
+  server.on("/clearvars", HTTP_POST, []() {
+    clearAllVariables();
+    addLog("[VARS] Cleared all variables by user");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "text/plain", "Variables cleared");
+  });
+
 
   server.begin();
 }

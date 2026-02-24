@@ -103,6 +103,8 @@
   <div>
     <button id="runBtn">Send to ESP32</button>
     <button id="stopBtn">STOP</button>
+    <button id="clearFunctionsBtn">Clear functions</button>
+    <button id="clearVarsBtn">Clear variables</button>
   </div>
 
   <!-- Panels -->
@@ -1253,6 +1255,29 @@ document.getElementById("clearLogBtn").onclick = async () => {
     alert("Error clearing logs: " + e);
   }
 };
+
+document.getElementById("clearFunctionsBtn").onclick = async () => {
+  try {
+    await fetch("http://192.168.4.1/clearfunctions", { method: "POST" });
+    // refresh panels (functions + vars) if they are shown
+    if (typeof updateFunctions === "function") updateFunctions();
+    if (typeof updateVars === "function") updateVars();
+    alert("Functions cleared");
+  } catch(e) {
+    alert("Error clearing functions: " + e);
+  }
+};
+
+document.getElementById("clearVarsBtn").onclick = async () => {
+  try {
+    await fetch("http://192.168.4.1/clearvars", { method: "POST" });
+    if (typeof updateVars === "function") updateVars();
+    alert("Variables cleared");
+  } catch(e) {
+    alert("Error clearing variables: " + e);
+  }
+};
+
 
 
 </script>
