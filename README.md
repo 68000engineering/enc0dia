@@ -12,4 +12,4 @@ Setting up:
 3. Open <index.html> from <desktop>, which is inside the repository
 4. Enjoy!
 
-p.s special thanks for @nildanil for making a scratch for the browser IDE
+p.s special thanks for @nildanil for making a scratch for the web-page, including JS to connect everything together
